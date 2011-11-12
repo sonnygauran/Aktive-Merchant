@@ -42,7 +42,10 @@ class Merchant_Billing_PaypalCommon extends Merchant_Billing_Gateway
     {
         $url = $this->is_test() ? self::TEST_URL : self::LIVE_URL;
 
-        $response = $this->parse($this->ssl_post($url, $this->post_data($action)));
+        $post_data = $this->post_data($action);
+        Merchant_Logger::log(print_r($post_data, true));
+        
+        $response = $this->parse($this->ssl_post($url, $post_data));
 
         $options = array();
         $options['test'] = $this->is_test();
@@ -50,7 +53,9 @@ class Merchant_Billing_PaypalCommon extends Merchant_Billing_Gateway
         $options['fraud_review'] = $this->fraud_review_from($response);
         $options['avs_result'] = $this->avs_result_from($response);
         $options['cvv_result'] = isset($response['CVV2MATCH']) ? $response['CVV2MATCH'] : null;
-
+        
+        Merchant_Logger::log("Response: \n".print_r($response, true));
+        
         return $this->build_response($this->success_from($response), $this->message_from($response), $response, $options);
     }
 

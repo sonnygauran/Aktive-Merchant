@@ -134,7 +134,8 @@ class Merchant_Billing_PaypalExpress extends Merchant_Billing_PaypalCommon
         $this->post = array_merge($this->post, $params, $this->getOptionalParams($options));
 
         Merchant_Logger::log("Commit Payment Action: $action, Paypal Method: DoExpressCheckoutPayment");
-
+        Merchant_Logger::log('Parameters: '.print_r($this->options, true));
+        
         return $this->commit($action);
     }
 
@@ -151,10 +152,13 @@ class Merchant_Billing_PaypalExpress extends Merchant_Billing_PaypalCommon
 
         if (isset($options['items'])) {
             foreach ($options['items'] as $key => $item) {
-                $params['L_PAYMENTREQUEST_0_NAME' . $key] = $item['description'];
+                $params['L_PAYMENTREQUEST_0_NAME' . $key] = $item['name'];
                 $params['L_PAYMENTREQUEST_0_AMT' . $key] = $this->amount($item['unit_price']);
                 $params['L_PAYMENTREQUEST_0_QTY' . $key] = $item['quantity'];
                 $params['L_PAYMENTREQUEST_0_NUMBER' . $key] = $item['id'];
+                if (isset($item['description'])) {
+                    $params['L_PAYMENTREQUEST_0_DESC' . $key] = $item['description'];
+                }
             }
         }
         
@@ -220,6 +224,8 @@ class Merchant_Billing_PaypalExpress extends Merchant_Billing_PaypalCommon
         );
 
         $this->post = array_merge($this->post, $params);
+        Merchant_Logger::log('Post Data '. print_r($this->post, true));
+        
         return $this->urlize($this->post);
     }
 
