@@ -43,29 +43,25 @@ class Merchant_Logger
     
     static public function log($string)
     {
-        $trace_string = '';
         if ($string instanceof Exception) {
-            $trace_string = $this->_pad_exception($string);
+            $string = self::_pad_exception($string);
         }
         
-        if (null === self::$path) {
-            self::$path = dirname(__FILE__) . '/../../../log/';
-        }
+        include_once AKTIVE_MERCHANT_ROOT.'../../cake/libs/cake_log.php';
         
-        if (!is_writable(self::$path)) {
-            $exception = new Exception('AktiveMerchant - Cannot write to path '.  realpath(self::$path));
-            error_log($exception->getMessage()."\n".self::_pad_exception($exception));
-            return;
-        }
+        $Log = new CakeLog();
+        $Log->config('clean', array(
+            'engine' => 'CleanLog',
+        ));
         
-        $fp = fopen(self::$path . self::$filename, 'a');
-        fwrite($fp, $string . "\n");
-        fclose($fp);
+        $Log->write('debug', $string);
+
     }
 
     static public function error_log($string)
     {
-        self::log(COLOR_SEQ . "1;31m" . $string . RESET_SEQ);
+        //self::log(COLOR_SEQ . "1;31m" . $string . RESET_SEQ);
+        self::log(new Exception($string));
     }
 
     static public function end_logging()
